@@ -17,7 +17,7 @@ var ErrUnknownAuditor = errors.New("Unknown auditor")
 
 var AuditorNames = []string{
 	capabilities.Name,
-	cis.Name,
+	//cis.Name,	// Must be explicitly specified
 	cluster.Name,
 	image.Name,
 	limits.Name,
@@ -46,7 +46,7 @@ func initAuditor(name string, conf config.KubeauditConfig) (audit.Auditable, err
 	case capabilities.Name:
 		return capabilities.New(conf.GetAuditorConfigs().Capabilities), nil
 	case cis.Name:
-		return cis.New(), nil
+		return cis.New(conf.GetAuditorConfigs().Cis), nil
 	case cluster.Name:
 		return cluster.New(), nil
 	case image.Name:

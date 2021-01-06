@@ -69,7 +69,7 @@ func auditIsReplicaSetHA(resource k8stypes.Resource, resources []k8stypes.Resour
 				Name:     DeploymentPodsOnSameNode,
 				Severity: audit.Warn,
 				Message:  "All the Pods are located on the same Node: this is not H-A !",
-				Resource: &resource,	// BUG ???? &resources[idx]
+				Resource: resource,
 				PendingFix: &fixPodAntiAffinityAdded{},
 				Metadata: audit.Metadata{
 					"PodNames": strings.Join(podNames, ", "),

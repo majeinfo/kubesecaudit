@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/majeinfo/kubesecaudit/auditors/capabilities"
+	"github.com/majeinfo/kubesecaudit/auditors/cis"
 	"github.com/majeinfo/kubesecaudit/auditors/image"
 	"github.com/majeinfo/kubesecaudit/auditors/limits"
 	"gopkg.in/yaml.v1"
@@ -54,5 +55,6 @@ type AuditorConfig struct {
 	Capabilities capabilities.Config `yaml:"capabilities"`
 	Image        image.Config        `yaml:"image"`
 	Limits       limits.Config       `yaml:"limits"`
+	Cis 		 cis.Config 		 `yaml:"cis"`
 }
 

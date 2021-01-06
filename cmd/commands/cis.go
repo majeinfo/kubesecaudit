@@ -16,11 +16,17 @@ var cisCmd = &cobra.Command{
 Example usage:
 kubeaudit cis`),
 	Run: func(cmd *cobra.Command, args []string) {
-		runAudit(cis.New())(cmd, args)
+		conf := loadKubeAuditConfigFromFile(auditAllConfig.configFile)
+
+		// Config options set via flags override the config file
+		conf = setConfigFromFlags(cmd, conf)
+
+		runAudit(cis.New(conf.GetAuditorConfigs().Cis))(cmd, args)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(cisCmd)
+	cisCmd.Flags().StringVarP(&auditAllConfig.configFile, "kconfig", "k", "", "Path to kubeaudit config")
 }
 

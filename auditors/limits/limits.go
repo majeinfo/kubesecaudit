@@ -75,7 +75,7 @@ func (limits *Limits) auditContainer(container *k8stypes.ContainerV1, resource k
 			Name:     LimitsNotSet,
 			Severity: audit.Warn,
 			Message:  "Resource limits not set.",
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},
@@ -92,7 +92,7 @@ func (limits *Limits) auditContainer(container *k8stypes.ContainerV1, resource k
 			Name:     LimitsCPUNotSet,
 			Severity: audit.Warn,
 			Message:  "Resource CPU limit not set.",
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},
@@ -104,7 +104,7 @@ func (limits *Limits) auditContainer(container *k8stypes.ContainerV1, resource k
 			Name:     LimitsCPUExceeded,
 			Severity: audit.Warn,
 			Message:  fmt.Sprintf("CPU limit exceeded. It is set to '%s' which exceeds the max CPU limit of '%s'.", cpu, maxCPU),
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":         container.Name,
 				"ContainerCpuLimit": cpu,
@@ -119,7 +119,7 @@ func (limits *Limits) auditContainer(container *k8stypes.ContainerV1, resource k
 			Name:     LimitsMemoryNotSet,
 			Severity: audit.Warn,
 			Message:  "Resource Memory limit not set.",
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},
@@ -131,7 +131,7 @@ func (limits *Limits) auditContainer(container *k8stypes.ContainerV1, resource k
 			Name:     LimitsMemoryExceeded,
 			Severity: audit.Warn,
 			Message:  fmt.Sprintf("Memory limit exceeded. It is set to '%s' which exceeds the max Memory limit of '%s'.", memory, maxMemory),
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":            container.Name,
 				"ContainerMemoryLimit": memory,

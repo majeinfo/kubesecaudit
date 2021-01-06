@@ -86,8 +86,8 @@ func (p *Printer) prettyPrintReport(report *Report) {
 		if auditResult.Resource != nil {
 			p.printColor(color.CyanColor, "   Resource:\n")
 			resource := auditResult.Resource
-			objectMeta := k8s.GetObjectMeta(*resource)
-			typeMeta := k8s.GetTypeMeta(*resource)
+			objectMeta := k8s.GetObjectMeta(resource)
+			typeMeta := k8s.GetTypeMeta(resource)
 
 			if typeMeta != nil {
 				resourceApiVersion, resourceKind := typeMeta.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
@@ -164,7 +164,7 @@ func (p *Printer) logAuditResult(auditResult *AuditResult, baseLogger *log.Logge
 func (p *Printer) getLogFieldsForResult(auditResult *AuditResult) log.Fields {
 	resource := auditResult.Resource
 	//apiVersion, kind := resource.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
-	objectMeta := k8s.GetObjectMeta(*resource)
+	objectMeta := k8s.GetObjectMeta(resource)
 
 	fields := log.Fields{
 		"AuditResultName":    auditResult.Name,

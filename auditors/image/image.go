@@ -60,7 +60,7 @@ func auditContainer(container *k8stypes.ContainerV1, image string, resource k8st
 			Name:     ImageTagMissing,
 			Severity: audit.Warn,
 			Message:  "Image tag is missing.",
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},
@@ -72,7 +72,7 @@ func auditContainer(container *k8stypes.ContainerV1, image string, resource k8st
 			Name:     ImageTagIncorrect,
 			Severity: audit.Error,
 			Message:  fmt.Sprintf("Container tag is incorrect. It should be set to '%s'.", tag),
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},
@@ -84,7 +84,7 @@ func auditContainer(container *k8stypes.ContainerV1, image string, resource k8st
 			Name:     ImageCorrect,
 			Severity: audit.Info,
 			Message:  "Image tag is correct",
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container": container.Name,
 			},

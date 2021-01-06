@@ -55,7 +55,7 @@ func New(config Config) *Capabilities {
 func (a *Capabilities) Audit(resources []k8stypes.Resource) ([]*audit.AuditResult, error) {
 	var auditResults []*audit.AuditResult
 
-	for idx, resource := range resources {
+	for _, resource := range resources {
 		if !k8stypes.IsPodV1(resource) {
 			continue
 		}
@@ -89,7 +89,7 @@ func (a *Capabilities) Audit(resources []k8stypes.Resource) ([]*audit.AuditResul
 						container:  container,
 						capability: strings.Join(addedCap, ", "),
 					},
-					Resource: &resources[idx],
+					Resource: resource,
 					Metadata: audit.Metadata{
 						"Container":  container.Name,
 						"Capability": strings.Join(addedCap, ", "),
@@ -106,7 +106,7 @@ func (a *Capabilities) Audit(resources []k8stypes.Resource) ([]*audit.AuditResul
 						container:  container,
 						capability: strings.Join(notDroppedCap, ", "),
 					},
-					Resource: &resources[idx],
+					Resource: resource,
 					Metadata: audit.Metadata{
 						"Container":  container.Name,
 						"Capability": strings.Join(notDroppedCap, ", "),
@@ -134,7 +134,7 @@ func auditCapabilityIsAdded(container *k8stypes.ContainerV1, capability string, 
 				container:  container,
 				capability: capability,
 			},
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":  container.Name,
 				"Capability": capability,
@@ -156,7 +156,7 @@ func auditCapabilityIsNotDropped(container *k8stypes.ContainerV1, capability str
 				container:  container,
 				capability: capability,
 			},
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":  container.Name,
 				"Capability": capability,
@@ -178,7 +178,7 @@ func auditContainerForCapability(container *k8stypes.ContainerV1, capability str
 				container:  container,
 				capability: capability,
 			},
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":  container.Name,
 				"Capability": capability,
@@ -196,7 +196,7 @@ func auditContainerForCapability(container *k8stypes.ContainerV1, capability str
 				container:  container,
 				capability: capability,
 			},
-			Resource: &resource,
+			Resource: resource,
 			Metadata: audit.Metadata{
 				"Container":  container.Name,
 				"Capability": capability,

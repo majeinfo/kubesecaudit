@@ -20,7 +20,7 @@ type AuditResult struct {
 	Severity   SeverityLevel // Severity is one of Error, Warn, or Info
 	Message    string        // Message is a human-readable description of the audit result
 	PendingFix PendingFix    // PendingFix is the fix that will be applied to automatically fix the security issue
-	Resource   *k8stypes.Resource	// Pointer to K8s Resource (may be nil)
+	Resource   k8stypes.Resource	// Pointer to K8s Resource (may be nil)
 	Metadata   Metadata      // Metadata includes additional context for an audit result
 }
 
