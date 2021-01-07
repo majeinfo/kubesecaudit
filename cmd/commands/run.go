@@ -71,7 +71,8 @@ func runAudit(auditable ...audit.Auditable) func(cmd *cobra.Command, args []stri
 			printOptions = append(printOptions, audit.WithFormatter(&log.TextFormatter{}))
 		}
 
-		report.PrintResults(printOptions...)
+
+		report.PrintResults(auditAllConfig.ignore_tests, printOptions...)
 
 		//if report.HasErrors() {
 		//	os.Exit(rootConfig.exitCode)

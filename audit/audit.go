@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/majeinfo/kubesecaudit/internal/k8s"
 	"github.com/majeinfo/kubesecaudit/k8stypes"
+	"strings"
 )
 
 type SeverityLevel int
@@ -106,14 +107,30 @@ func (r *Report) Results() []Result {
  */
 
 // ResultsWithMinSeverity returns the audit results for each Kubernetes resource with a minimum severity
+// Also skip Result that must be ignored
+var ignore_tests []string
+
 func (r *Report) ResultsWithMinSeverity(minSeverity SeverityLevel) []*AuditResult {
 	var results []*AuditResult
+
 	for _, result := range r.results {
 		if result.Severity >= minSeverity {
-			results = append(results, result)
+			if !mustIgnore(result.Name, ignore_tests) {
+				results = append(results, result)
+			}
 		}
 	}
 	return results
+}
+
+func mustIgnore(test_name string, ignores []string) bool {
+	for _, ignore := range ignores {
+		if ignore == test_name {
+			return true
+		}
+	}
+
+	return false
 }
 
 /*
@@ -132,7 +149,8 @@ func (r *Report) HasErrors() (errorsFound bool) {
  */
 
 // PrintResults writes the audit results to the specified writer. Defaults to printing results to stdout
-func (r *Report) PrintResults(printOptions ...PrintOption) {
+func (r *Report) PrintResults(ignores string, printOptions ...PrintOption) {
+	ignore_tests = strings.Split(ignores, ",")
 	printer := NewPrinter(printOptions...)
 	printer.PrintReport(r)
 }

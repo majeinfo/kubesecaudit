@@ -16,9 +16,12 @@ import (
 
 const Name = "cis"
 
+// Possible Audit Messages
 const (
 	FileError = "FileError"
 	FilePermsError = "FilePermsError"
+
+	KubeApiServerNotFound = "KubeApiServerNotFound"
 )
 
 type fileToAudit struct {
@@ -45,6 +48,8 @@ const (
 	conf_kubeletConf = "kubeletConf"
 	conf_k8sPkiDir = "k8sPkiDir"
 	conf_kubeletService = "kubeletService"
+
+	proc_apiserver = "kube-apiserver"
 )
 
 func init() {
@@ -75,7 +80,11 @@ func (cis *CISConfig) Audit(resources []k8stypes.Resource) ([]*audit.AuditResult
 	var auditResults []*audit.AuditResult
 
 	auditResults = append(auditResults, auditFiles(cis)...)
-	auditResults = append(auditResults, auditAPIServer()...)
+	processes, err := GetAllProcesses()
+	if err != nil {
+		return auditResults, err
+	}
+	auditResults = append(auditResults, auditAPIServer(processes)...)
 
 	return auditResults, nil
 }
@@ -139,10 +148,21 @@ func checkOwnerAndPerms(fname string, user string, group string, mode int) []*au
 	return auditResults
 }
 
-func auditAPIServer() []*audit.AuditResult {
+func auditAPIServer(procs []Process) []*audit.AuditResult {
 	var auditResults []*audit.AuditResult
 
-	Processes()
+	if proc := FindProc(procs, proc_apiserver); proc == nil {
+		auditResult := &audit.AuditResult{
+			Name:     KubeApiServerNotFound,
+			Severity: audit.Warn,
+			Message:  "Api-server not found - no audit done",
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+		return auditResults
+	}
 
 	return auditResults
 }

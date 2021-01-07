@@ -11,6 +11,11 @@ import (
 
 var auditAllConfig struct {
 	configFile string
+	ignore_tests string
+}
+
+func GetIgnoreTests() string {
+	return auditAllConfig.ignore_tests
 }
 
 func auditAll(cmd *cobra.Command, args []string) {
@@ -83,6 +88,7 @@ kubeaudit all -k /path/to/kubeaudit-config.yaml /path/to/yaml
 func init() {
 	RootCmd.AddCommand(auditAllCmd)
 	auditAllCmd.Flags().StringVarP(&auditAllConfig.configFile, "kconfig", "k", "", "Path to kubeaudit config")
+	auditAllCmd.Flags().StringVarP(&auditAllConfig.ignore_tests, "ignore", "", "", "Comma separated list on Tests to ignore")
 
 	setImageFlags(auditAllCmd)
 	setLimitsFlags(auditAllCmd)

@@ -28,5 +28,6 @@ kubeaudit cis`),
 func init() {
 	RootCmd.AddCommand(cisCmd)
 	cisCmd.Flags().StringVarP(&auditAllConfig.configFile, "kconfig", "k", "", "Path to kubeaudit config")
+	cisCmd.Flags().StringVarP(&auditAllConfig.ignore_tests, "ignore", "", "", "Comma separated list on Tests to ignore")
 }
 
