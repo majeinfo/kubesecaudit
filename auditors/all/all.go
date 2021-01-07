@@ -7,6 +7,11 @@ import (
 	"github.com/majeinfo/kubesecaudit/auditors/asat"
 	"github.com/majeinfo/kubesecaudit/auditors/mountds"
 	"github.com/majeinfo/kubesecaudit/auditors/netpols"
+	"github.com/majeinfo/kubesecaudit/auditors/nonroot"
+	"github.com/majeinfo/kubesecaudit/auditors/privesc"
+	"github.com/majeinfo/kubesecaudit/auditors/privileged"
+	"github.com/majeinfo/kubesecaudit/auditors/rootfs"
+	"github.com/majeinfo/kubesecaudit/auditors/seccomp"
 
 	"github.com/majeinfo/kubesecaudit/audit"
 	"github.com/majeinfo/kubesecaudit/auditors/capabilities"
@@ -31,6 +36,11 @@ var AuditorNames = []string{
 	limits.Name,
 	mountds.Name,
 	netpols.Name,
+	nonroot.Name,
+	privesc.Name,
+	privileged.Name,
+	rootfs.Name,
+	seccomp.Name,
 }
 
 func Auditors(conf config.KubeauditConfig) ([]audit.Auditable, error) {
@@ -73,6 +83,16 @@ func initAuditor(name string, conf config.KubeauditConfig) (audit.Auditable, err
 		return mountds.New(), nil
 	case netpols.Name:
 		return netpols.New(), nil
+	case nonroot.Name:
+		return nonroot.New(), nil
+	case privesc.Name:
+		return privesc.New(), nil
+	case privileged.Name:
+		return privileged.New(), nil
+	case rootfs.Name:
+		return rootfs.New(), nil
+	case seccomp.Name:
+		return seccomp.New(), nil
 	}
 
 	return nil, fmt.Errorf("unknown auditor %s: %w", name, ErrUnknownAuditor)
