@@ -9,7 +9,6 @@ import (
 	"github.com/majeinfo/kubesecaudit/k8stypes"
 	"os"
 	_ "os"
-
 	//"github.com/majeinfo/kubeaudit/audit"
 	//"github.com/majeinfo/kubeaudit/k8stypes"
 )
@@ -22,6 +21,21 @@ const (
 	FilePermsError = "FilePermsError"
 
 	KubeApiServerNotFound = "KubeApiServerNotFound"
+	AnonymousAuthEnabled = "AnonymousAuthEnabled"
+	BasicAuthFileDefined = "BasicAuthFileDefined"
+	TokenAuthFileDefined = "TokenAuthFileDefined"
+	AuthModeAlwaysAllowEnabled = "AuthModeAlwaysAllowEnabled"
+	AuthModeNodeDisabled = "AuthModeNodeDisabled"
+	AuthModeRBACDisabled = "AuthModeRBACDisabled"
+	AdmissionControllerEventRateLimitDisabled = "AdmissionControllerEventRateLimitDisabled"
+	AdmissionControllerAlwaysPullImagesDisabled = "AdmissionControllerAlwaysPullImagesDisabled"
+	AdmissionControllerAlwaysAdmitEnabled = "AdmissionControllerAlwaysAdmitEnabled"
+	AdmissionControllerSecurityContextDenyDisabled = "AdmissionControllerSecurityContextDenyDisabled"
+	AdmissionControllerServiceAccountDisabled = "AdmissionControllerServiceAccountDisabled"
+	AdmissionControllerNamespaceLifecycleDisabled = "AdmissionControllerNamespaceLifecycleDisabled"
+	AdmissionControllerPodSecurityPolicyDisabled = "AdmissionControllerPodSecurityPolicyDisabled"
+	AdmissionControllerNodeSecurityDisabled = "AdmissionControllerNodeSecurityDisabled"
+	KubeletCertificateAuthorityDisabled = "KubeletCertificateAuthorityDisabled"
 )
 
 type fileToAudit struct {
@@ -143,25 +157,6 @@ func checkOwnerAndPerms(fname string, user string, group string, mode int) []*au
 			}
 			auditResults = append(auditResults, auditResult)
 		}
-	}
-
-	return auditResults
-}
-
-func auditAPIServer(procs []Process) []*audit.AuditResult {
-	var auditResults []*audit.AuditResult
-
-	if proc := FindProc(procs, proc_apiserver); proc == nil {
-		auditResult := &audit.AuditResult{
-			Name:     KubeApiServerNotFound,
-			Severity: audit.Warn,
-			Message:  "Api-server not found - no audit done",
-			Metadata: audit.Metadata{
-				"File": proc_apiserver,
-			},
-		}
-		auditResults = append(auditResults, auditResult)
-		return auditResults
 	}
 
 	return auditResults
