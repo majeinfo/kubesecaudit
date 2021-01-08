@@ -25,10 +25,15 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 
 	// Examine the options (set the default values first)
 	opt_anonymous_auth := true
+	opt_profiling := true
 
 	for _, option := range proc.options {
 		if option == "--anonymous-auth=false" {
 			opt_anonymous_auth = false
+			continue
+		}
+		if option == "--profiling=false" {
+			opt_profiling = false
 			continue
 		}
 		if strings.HasPrefix(option, "--authorization-mode=") {
@@ -73,6 +78,19 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 			Severity: audit.Error,
 			Message:  "Anonymous access is allowed",
 			PendingFix: &fixAnonymousAuthEnabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if opt_profiling {
+		auditResult := &audit.AuditResult{
+			Name:     ProfilingEnabled,
+			Severity: audit.Error,
+			Message:  "Profiling is enabled: it may slow down the Cluster and produce information leaks",
+			PendingFix: &fixProfilingEnabled{},
 			Metadata: audit.Metadata{
 				"File": proc_apiserver,
 			},
@@ -269,6 +287,32 @@ func auditAPIServerKeyAndCertificates(options []string) []*audit.AuditResult {
 			Severity: audit.Warn,
 			Message:  "The --kubelet-certificate-authority option is missing ! This option is useful to authenticate kubelet and avoid Mitm attacks",
 			PendingFix: &fixKubeletCertificateAuthorityDisabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if !findPrefixName(options, "--kubelet-client-certificate") {
+		auditResult := &audit.AuditResult{
+			Name:     KubeletClientCertificateDisabled,
+			Severity: audit.Warn,
+			Message:  "The --kubelet-client-certificate option is missing ! This option is useful to authenticate towards kubelet",
+			PendingFix: &fixKubeletClientCertificateDisabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if !findPrefixName(options, "--kubelet-client-key") {
+		auditResult := &audit.AuditResult{
+			Name:     KubeletClientKeyDisabled,
+			Severity: audit.Warn,
+			Message:  "The --kubelet-client-key option is missing ! This option is useful to authenticate towards kubelet",
+			PendingFix: &fixKubeletClientKeyDisabled{},
 			Metadata: audit.Metadata{
 				"File": proc_apiserver,
 			},

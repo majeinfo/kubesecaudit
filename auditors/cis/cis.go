@@ -18,6 +18,7 @@ const (
 
 	KubeApiServerNotFound = "KubeApiServerNotFound"
 	AnonymousAuthEnabled = "AnonymousAuthEnabled"
+	ProfilingEnabled = "ProfilingEnabled"
 	BasicAuthFileDefined = "BasicAuthFileDefined"
 	TokenAuthFileDefined = "TokenAuthFileDefined"
 	AuthModeAlwaysAllowEnabled = "AuthModeAlwaysAllowEnabled"
@@ -32,6 +33,8 @@ const (
 	AdmissionControllerPodSecurityPolicyDisabled = "AdmissionControllerPodSecurityPolicyDisabled"
 	AdmissionControllerNodeRestrictionDisabled = "AdmissionControllerNodeRestrictionDisabled"
 	KubeletCertificateAuthorityDisabled = "KubeletCertificateAuthorityDisabled"
+	KubeletClientCertificateDisabled = "KubeletClientCertificateDisabled"
+	KubeletClientKeyDisabled = "KubeletClientKeyDisabled"
 )
 
 type fileToAudit struct {

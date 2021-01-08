@@ -10,6 +10,12 @@ func (f *fixAnonymousAuthEnabled) Plan() string {
 	return fmt.Sprintf("Add this option to the api-server: --anonymous-auth=false")
 }
 
+type fixProfilingEnabled struct {}
+
+func (f *fixProfilingEnabled) Plan() string {
+	return fmt.Sprintf("Add this option to the api-server: --profiling=false")
+}
+
 type fixBasicAuthFileEnabled struct {}
 
 func (f *fixBasicAuthFileEnabled) Plan() string {
@@ -91,8 +97,21 @@ func (f *fixAdmissionControllerNodeRestrictionDisabled) Plan() string {
 type fixKubeletCertificateAuthorityDisabled struct {}
 
 func (f *fixKubeletCertificateAuthorityDisabled) Plan() string {
-	return fmt.Sprintf("Add this option to the api-server: --kubelet-certificate-authorityh=/path/to/cacarte")
+	return fmt.Sprintf("Add this option to the api-server: --kubelet-certificate-authorityh=/path/to/cacart")
 }
+
+type fixKubeletClientCertificateDisabled struct {}
+
+func (f *fixKubeletClientCertificateDisabled) Plan() string {
+	return fmt.Sprintf("Add this option to the api-server: --kubelet-client-certificate=/path/to/cert")
+}
+
+type fixKubeletClientKeyDisabled struct {}
+
+func (f *fixKubeletClientKeyDisabled) Plan() string {
+	return fmt.Sprintf("Add this option to the api-server: --kubelet-client-key=/path/to/key")
+}
+
 
 
 
