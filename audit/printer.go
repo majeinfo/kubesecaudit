@@ -162,23 +162,24 @@ func (p *Printer) logAuditResult(auditResult *AuditResult, baseLogger *log.Logge
 }
 
 func (p *Printer) getLogFieldsForResult(auditResult *AuditResult) log.Fields {
-	resource := auditResult.Resource
-	//apiVersion, kind := resource.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
-	objectMeta := k8s.GetObjectMeta(resource)
-
 	fields := log.Fields{
 		"AuditResultName":    auditResult.Name,
 		//"ResourceKind":       kind,
 		//"ResourceApiVersion": apiVersion,
 	}
 
-	if objectMeta != nil {
-		if objectMeta.GetNamespace() != "" {
-			fields["ResourceNamespace"] = objectMeta.GetNamespace()
-		}
+	resource := auditResult.Resource
+	if resource != nil {
+		//apiVersion, kind := resource.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
+		objectMeta := k8s.GetObjectMeta(resource)
+		if objectMeta != nil {
+			if objectMeta.GetNamespace() != "" {
+				fields["ResourceNamespace"] = objectMeta.GetNamespace()
+			}
 
-		if objectMeta.GetName() != "" {
-			fields["ResourceName"] = objectMeta.GetName()
+			if objectMeta.GetName() != "" {
+				fields["ResourceName"] = objectMeta.GetName()
+			}
 		}
 	}
 
