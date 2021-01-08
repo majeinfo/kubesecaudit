@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strconv"
 	"syscall"
 
@@ -32,7 +33,25 @@ func auditFiles(cis *CISConfig) []*audit.AuditResult {
 		auditResults = append(auditResults, res...)
 	}
 
-	// TODO: *crt and *key
+	// Check owner and perms of private keys and certificates located under K8sPkiDir
+	filepath.Walk(filesToAudit[conf_k8sPkiDir].fname,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			if filepath.Ext(path) == ".crt" {
+				res := checkOwnerAndPerms(path, "root", "root", 0644)
+				auditResults = append(auditResults, res...)
+			}
+			if filepath.Ext(path) == ".key" {
+				res := checkOwnerAndPerms(path, "root", "root", 0600)
+				auditResults = append(auditResults, res...)
+			}
+			return nil
+		})
 
 	return auditResults
 }
