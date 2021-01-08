@@ -23,30 +23,17 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 		return auditResults
 	}
 
-	// Examine the options (set the default values first)
-	opt_anonymous_auth := true
-	opt_profiling := true
+	options := buildMapFromOptions(proc.options)
 
-	for _, option := range proc.options {
-		if option == "--anonymous-auth=false" {
-			opt_anonymous_auth = false
-			continue
-		}
-		if option == "--profiling=false" {
-			opt_profiling = false
-			continue
-		}
-		if strings.HasPrefix(option, "--authorization-mode=") {
-			auditResults = append(auditResults, auditAPIServerAuthorizationMode(option)...)
-			continue
-		}
-		if strings.HasPrefix(option, "--enable-admission-plugins=") {
-			auditResults = append(auditResults, auditAPIServerEnableAdmissionPlugins(option)...)
-			continue
-		}
+	if value, found := options["authorization-mode"]; found {
+		auditResults = append(auditResults, auditAPIServerAuthorizationMode(value)...)
 	}
 
-	if findPrefixName(proc.options, "--basic-auth-file=") {
+	if value, found := options["enable-admission-plugins"]; found {
+		auditResults = append(auditResults, auditAPIServerEnableAdmissionPlugins(value)...)
+	}
+
+	if _, found := options["basic-auth-file"]; found {
 		auditResult := &audit.AuditResult{
 			Name:     BasicAuthFileDefined,
 			Severity: audit.Error,
@@ -59,7 +46,7 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if findPrefixName(proc.options, "--token-auth-file=") {
+	if _, found := options["token-auth-file"]; found {
 		auditResult := &audit.AuditResult{
 			Name:     TokenAuthFileDefined,
 			Severity: audit.Error,
@@ -72,7 +59,8 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if opt_anonymous_auth {
+	// --anonymous-auth=true by default
+	if value, found := options["anonymous-auth"]; !found || (found && value == "true") {
 		auditResult := &audit.AuditResult{
 			Name:     AnonymousAuthEnabled,
 			Severity: audit.Error,
@@ -85,7 +73,34 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if opt_profiling {
+	// --service-account-lookup=true by default
+	if value, found := options["service-account-lookup"]; found && value == "false" {
+		auditResult := &audit.AuditResult{
+			Name:     ServiceAccountLookupDisabled,
+			Severity: audit.Error,
+			Message:  "Service account lookup is disabled",
+			PendingFix: &fixServiceAccountLookupDisabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["service-account-key-file"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     ServiceAccountLookupDisabled,
+			Severity: audit.Error,
+			Message:  "Service account lookup is disabled",
+			PendingFix: &fixServiceAccountLookupDisabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if value, found := options["profiling"]; !found || value == "true" {
 		auditResult := &audit.AuditResult{
 			Name:     ProfilingEnabled,
 			Severity: audit.Error,
@@ -98,7 +113,30 @@ func auditAPIServer(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	auditResults = append(auditResults, auditAPIServerKeyAndCertificates(proc.options)...)
+	_, found1 := options["audit-log-path"]
+	_, found2 := options["audit-webhook-config-file"]
+
+	if !found1 && !found2 {
+		auditResult := &audit.AuditResult{
+			Name:     AuditDisabled,
+			Severity: audit.Error,
+			Message:  "Auditing is disabled. It is considered a best practice to audit the calls made to the api-server",
+			PendingFix: &fixAuditDisabled{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if found1 {
+		auditResults = append(auditResults, auditAPIServerAuditLog(options)...)
+	}
+
+	auditResults = append(auditResults, auditAPIServerKeyAndCertificates(options)...)
+	auditResults = append(auditResults, auditAPIServerEtcd(options)...)
+
+	// TODO: audit the option --tls-cipher-suites
 
 	return auditResults
 }
@@ -278,10 +316,10 @@ func auditAPIServerEnableAdmissionPlugins(plugins_opt string) []*audit.AuditResu
 	return auditResults
 }
 
-func auditAPIServerKeyAndCertificates(options []string) []*audit.AuditResult {
+func auditAPIServerKeyAndCertificates(options map[string]string) []*audit.AuditResult {
 	var auditResults []*audit.AuditResult
 
-	if !findPrefixName(options, "--kubelet-certificate-authority") {
+	if _, found := options["kubelet-certificate-authority"]; !found {
 		auditResult := &audit.AuditResult{
 			Name:     KubeletCertificateAuthorityDisabled,
 			Severity: audit.Warn,
@@ -294,7 +332,7 @@ func auditAPIServerKeyAndCertificates(options []string) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if !findPrefixName(options, "--kubelet-client-certificate") {
+	if _, found := options["kubelet-client-certificate"]; !found {
 		auditResult := &audit.AuditResult{
 			Name:     KubeletClientCertificateDisabled,
 			Severity: audit.Warn,
@@ -307,7 +345,7 @@ func auditAPIServerKeyAndCertificates(options []string) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if !findPrefixName(options, "--kubelet-client-key") {
+	if _, found := options["kubelet-client-key"]; !found {
 		auditResult := &audit.AuditResult{
 			Name:     KubeletClientKeyDisabled,
 			Severity: audit.Warn,
@@ -320,26 +358,151 @@ func auditAPIServerKeyAndCertificates(options []string) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
+	if _, found := options["tls-cert-file"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     TLSCertFileNotSet,
+			Severity: audit.Warn,
+			Message:  "The --tls-cert-file option is missing ! This option is useful to authenticate clients",
+			PendingFix: &fixTLSCertFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["tls-private-key-file"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     TLSPrivateKeyFileNotSet,
+			Severity: audit.Warn,
+			Message:  "The --tls-private-key-file option is missing ! This option is useful to authenticate clients",
+			PendingFix: &fixTLSPrivateKeyFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["client-ca-file"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     ClientCAFileNotSet,
+			Severity: audit.Warn,
+			Message:  "The --client-ca-file option is missing ! This option is useful to authenticate clients certified by one of a well-known CA",
+			PendingFix: &fixClientCAFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
 	return auditResults
 }
 
-func findPrefixName(string_list []string, name string) bool {
-	for _, s := range string_list {
-		if strings.HasPrefix(s, name) {
-			return true
+// This function is called if --audit-log-path=/path/to/audit.log option has been set
+func auditAPIServerAuditLog(options map[string]string) []*audit.AuditResult {
+	var auditResults []*audit.AuditResult
+
+	if _, found := options["audit-log-maxage"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     AuditLogMaxageNotSet,
+			Severity: audit.Warn,
+			Message:  "The --audit-log-maxage option is missing ! This option is useful to minimize the logs amount",
+			PendingFix: &fixAuditLogMaxageNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
 		}
+		auditResults = append(auditResults, auditResult)
 	}
 
-	return false
-}
-
-func findName(strings []string, name string) bool {
-	for _, s := range strings {
-		if s == name {
-			return true
+	if _, found := options["--audit-log-maxsize"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     AuditLogMaxsizeNotSet,
+			Severity: audit.Warn,
+			Message:  "The --audit-log-maxsize option is missing ! This option is useful to minimize the logs amount",
+			PendingFix: &fixAuditLogMaxsizeNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
 		}
+		auditResults = append(auditResults, auditResult)
 	}
 
-	return false
+	if _, found := options["--audit-log-maxbackup"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     AuditLogMaxbackupNotSet,
+			Severity: audit.Warn,
+			Message:  "The --audit-log-maxbackup option is missing ! This option is useful to minimize the logs amount",
+			PendingFix: &fixAuditLogMaxbackupNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	return auditResults
 }
+
+// This function audits etcd related parameters
+func auditAPIServerEtcd(options map[string]string) []*audit.AuditResult {
+	var auditResults []*audit.AuditResult
+
+	if _, found := options["etcd-certfile"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     EtcdCertFileNotSet,
+			Severity: audit.Error,
+			Message:  "The --etcd-certfile option is missing ! This option is useful to securize etcd access",
+			PendingFix: &fixEtcdCertFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["etcd-keyfile"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     EtcdKeyFileNotSet,
+			Severity: audit.Error,
+			Message:  "The --etcd-keyfile option is missing ! This option is useful to securize etcd access",
+			PendingFix: &fixEtcdKeyFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["etcd-cafile"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     EtcdCAFileNotSet,
+			Severity: audit.Error,
+			Message:  "The --etcd-cafile option is missing ! This option is useful to securize etcd access",
+			PendingFix: &fixEtcdCAFileNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	if _, found := options["encryption-provider-config"]; !found {
+		auditResult := &audit.AuditResult{
+			Name:     EncryptionProviderConfigNotSet,
+			Severity: audit.Warn,
+			Message:  "The --encryption-provider-config option is missing ! This option is useful to encrypt etcd content",
+			PendingFix: &fixEncryptionProviderConfigNotSet{},
+			Metadata: audit.Metadata{
+				"File": proc_apiserver,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	return auditResults
+}
+
 

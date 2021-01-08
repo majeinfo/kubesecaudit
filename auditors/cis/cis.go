@@ -1,6 +1,7 @@
 package cis
 
 // Implements the CIS Benchmark tests
+// TODO: when processes are executed as POD, should map the filename with the real filename from the outside point of view
 
 import (
 	"github.com/majeinfo/kubesecaudit/audit"
@@ -11,14 +12,21 @@ const Name = "cis"
 
 // Possible Audit Messages
 const (
+	// Files and directories
 	FileError = "FileError"
 	FilePermsError = "FilePermsError"
 	FileOwnerError = "FileOwnerError"
 	FileGroupOwnerError = "FileGroupOwnerError"
 
+	// Api-server
 	KubeApiServerNotFound = "KubeApiServerNotFound"
 	AnonymousAuthEnabled = "AnonymousAuthEnabled"
 	ProfilingEnabled = "ProfilingEnabled"
+	AuditDisabled = "AuditDisabled"
+	AuditLogMaxageNotSet = "AuditLogMaxageNotSet"
+	AuditLogMaxsizeNotSet = "AuditLogMaxsizeNotSet"
+	AuditLogMaxbackupNotSet = "AuditLogMaxbackupNotSet"
+	ServiceAccountLookupDisabled = "ServiceAccountLookupDisabled"
 	BasicAuthFileDefined = "BasicAuthFileDefined"
 	TokenAuthFileDefined = "TokenAuthFileDefined"
 	AuthModeAlwaysAllowEnabled = "AuthModeAlwaysAllowEnabled"
@@ -35,6 +43,46 @@ const (
 	KubeletCertificateAuthorityDisabled = "KubeletCertificateAuthorityDisabled"
 	KubeletClientCertificateDisabled = "KubeletClientCertificateDisabled"
 	KubeletClientKeyDisabled = "KubeletClientKeyDisabled"
+	TLSCertFileNotSet = "TLSCertFileNotSet"
+	TLSPrivateKeyFileNotSet = "TLSPrivateKeyFileNotSet"
+	ClientCAFileNotSet = "ClientCAFileNotSet"
+	EtcdCertFileNotSet = "EtcdCertFileNotSet"
+	EtcdKeyFileNotSet = "EtcdKeyFileNotSet"
+	EtcdCAFileNotSet = "EtcdCAFileNotSet"
+	EncryptionProviderConfigNotSet = "EncryptionProviderConfigNotSet"
+
+	// Controller Manager
+	KubeControllerManagerNotFound = "KubeControllerManagerNotFound"
+	CMProfilingEnabled = "CMProfilingEnabled"
+	UserServiceAccountCredentialsNotSet = "UserServiceAccountCredentialsNotSet"
+	ServiceAccountPrivateKeyFileNotSet = "ServiceAccountPrivateKeyFileNotSet"
+	RootCAFileNotSet = "RootCAFileNotSet"
+	CMBindAddressNotLocal = "CMBindAddressNotLocal"
+
+	// Scheduler
+	KubeSchedulerNotFound = "KubeSchedulerNotFound"
+	SchedulerProfilingEnabled = "SchedulerProfilingEnabled"
+	SchedulerBindAddressNotLocal = "SchedulerBindAddressNotLocal"
+
+	// Kubelet
+	KubeletNotFound = "KubeletNotFound"
+	KubeletAnonymousAuthEnabled = "KubeletAnonymousAuthEnabled"
+	KubeletAlwaysAllowEnabled = "KubeletAlwaysAllowEnabled"
+	KubeletTLSCertFileNotSet = "KubeletTLSCertFileNotSet"
+	KubeletTLSPrivateKeyFileNotSet = "KubeletTLSPrivateKeyFileNotSet"
+
+	// Etcd
+	EtcdNotFound = "EtcdNotFound"
+	EtcdOptCertFileNotSet = "EtcdOptCertFileNotSet"
+	EtcdOptKeyFileNotSet = "EtcdOptKeyFileNotSet"
+	EtcdOptPeerCertFileNotSet = "EtcdOptPeerCertFileNotSet"
+	EtcdOptPeerKeyFileNotSet = "EtcdOptPeerKeyFileNotSet"
+	EtcdOptAutoTLSSet = "EtcdOptAutoTLSSet"
+	EtcdOptClientCertAuthNotSSet = "EtcdOptAClientCertAuthNotSSet"
+	EtcdOptPeerClientCertAuthNotSSet = "EtcdOptPeerClientCertAuthNotSSet"
+	EtcdOptPeerAutoTLSSet = "EtcdOptPeerAutoTLSSet"
+	EtcdOptPeerTrustedCAFileNotSet = "EtcdOptPeerTrustedCAFileNotSet"
+	EtcdOptTrustedCAFileNotSet = "EtcdOptTrustedCAFileNotSet"
 )
 
 type fileToAudit struct {
@@ -61,8 +109,13 @@ const (
 	conf_kubeletConf = "kubeletConf"
 	conf_k8sPkiDir = "k8sPkiDir"
 	conf_kubeletService = "kubeletService"
+	conf_cniDir = "cniDir"
 
 	proc_apiserver = "kube-apiserver"
+	proc_controller_manager = "kube-controller-manager"
+	proc_scheduler = "kube-scheduler"
+	proc_kubelet = "kubelet"
+	proc_etcd = "etcd"
 )
 
 func init() {
@@ -75,10 +128,11 @@ func init() {
 		conf_kubeSchedulerConf: { "/etc/kubernetes/scheduler.conf", "root", "root", 0644 },
 		conf_kubeEtcdPod: { "/etc/kubernetes/manifests/kube-etcd.yaml", "root", "root", 0644 },
 		conf_kubeletConf: { "/etc/kubernetes/kubelet.conf", "root", "root", 0644 },
+		conf_kubeletService: { "/etc/systemd/system/multi-user.target.wants/kubelet.service", "root", "root", 0644 },
 		conf_k8sPkiDir: { "/etc/kubernetes/pki", "root", "root", 0755 },
 		//{ "/etc/kubernetes/pki/*.crt", "root", "root", 0644 },
 		//{ "/etc/kubernetes/pki/*.key", "root", "root", 0600 },
-		conf_kubeletService: { "/etc/systemd/system/multi-user.target.wants/kubelet.service", "root", "root", 0644 },
+		conf_cniDir: { "/etc/cni/net.d", "root", "root", 0644 },
 	}
 }
 
@@ -98,6 +152,10 @@ func (cis *CISConfig) Audit(resources []k8stypes.Resource) ([]*audit.AuditResult
 		return auditResults, err
 	}
 	auditResults = append(auditResults, auditAPIServer(processes)...)
+	auditResults = append(auditResults, auditControllerManager(processes)...)
+	auditResults = append(auditResults, auditScheduler(processes)...)
+	auditResults = append(auditResults, auditKubelet(processes)...)
+	auditResults = append(auditResults, auditEtcd(processes)...)
 
 	return auditResults, nil
 }

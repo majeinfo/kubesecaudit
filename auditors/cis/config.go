@@ -12,5 +12,6 @@ type Config struct {
 	KubeletConf string `yaml:"kubeletConf"`
 	K8sPkiDir string `yaml:"k8sPkiDir"`
 	KubeletService string `yaml:"kubeletService"`
+	CNIDir string `yaml:cniDir`
 }
 

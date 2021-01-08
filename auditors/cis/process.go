@@ -9,6 +9,7 @@ import (
 type Process struct {
 	pname string
 	options []string
+	envvar []string
 }
 
 func GetAllProcesses() ([]Process, error) {
@@ -31,7 +32,11 @@ func GetAllProcesses() ([]Process, error) {
 			cmdLine = []string{}
 		}
 		if err2 == nil {
-			processes = append(processes, Process{pgm, cmdLine})
+			envvar, err := proc.Environ()
+			if err != nil {
+				envvar = []string{}
+			}
+			processes = append(processes, Process{pgm, cmdLine, envvar})
 		}
 	}
 
