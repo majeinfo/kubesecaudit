@@ -40,7 +40,7 @@ func GetAllProcesses() ([]Process, error) {
 
 func FindProc(procs []Process, proc_name string) *Process {
 	for _, proc := range procs {
-		if strings.HasSuffix(proc.pname, "/" + proc_name) {
+		if proc.pname == proc_name || strings.HasSuffix(proc.pname, "/" + proc_name) {
 			return &proc
 		}
 	}

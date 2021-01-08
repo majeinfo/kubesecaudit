@@ -30,7 +30,7 @@ const (
 	AdmissionControllerServiceAccountDisabled = "AdmissionControllerServiceAccountDisabled"
 	AdmissionControllerNamespaceLifecycleDisabled = "AdmissionControllerNamespaceLifecycleDisabled"
 	AdmissionControllerPodSecurityPolicyDisabled = "AdmissionControllerPodSecurityPolicyDisabled"
-	AdmissionControllerNodeSecurityDisabled = "AdmissionControllerNodeSecurityDisabled"
+	AdmissionControllerNodeRestrictionDisabled = "AdmissionControllerNodeRestrictionDisabled"
 	KubeletCertificateAuthorityDisabled = "KubeletCertificateAuthorityDisabled"
 )
 

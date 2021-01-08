@@ -82,9 +82,9 @@ func (f *fixAdmissionControllerPodSecurityPolicyDisabled) Plan() string {
 	return fmt.Sprintf("Add the module PodSecurityPolicy to the --enable-admission-plugins value of api-server")
 }
 
-type fixAdmissionControllerNodeSecurityDisabled struct {}
+type fixAdmissionControllerNodeRestrictionDisabled struct {}
 
-func (f *fixAdmissionControllerNodeSecurityDisabled) Plan() string {
+func (f *fixAdmissionControllerNodeRestrictionDisabled) Plan() string {
 	return fmt.Sprintf("Add the module NodeSecurity to the --enable-admission-plugins value of api-server")
 }
 

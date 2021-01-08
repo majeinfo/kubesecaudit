@@ -244,12 +244,12 @@ func auditAPIServerEnableAdmissionPlugins(plugins_opt string) []*audit.AuditResu
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if !findName(plugins, "NodeSecurity") {
+	if !findName(plugins, "NodeRestriction") {
 		auditResult := &audit.AuditResult{
-			Name:     AdmissionControllerNodeSecurityDisabled,
+			Name:     AdmissionControllerNodeRestrictionDisabled,
 			Severity: audit.Warn,
-			Message:  "The NodeSecurity admission controller module is disabled ! This module constraints kubelet to modify the objects owned by its Node",
-			PendingFix: &fixAdmissionControllerNodeSecurityDisabled{},
+			Message:  "The NodeRestriction admission controller module is disabled ! This module constraints kubelet to modify the objects owned by its Node",
+			PendingFix: &fixAdmissionControllerNodeRestrictionDisabled{},
 			Metadata: audit.Metadata{
 				"File": proc_apiserver,
 			},
