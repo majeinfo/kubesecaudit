@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/majeinfo/kubesecaudit/internal/k8s"
 	"github.com/majeinfo/kubesecaudit/k8stypes"
-	"strings"
 )
 
 type SeverityLevel int
@@ -149,8 +148,8 @@ func (r *Report) HasErrors() (errorsFound bool) {
  */
 
 // PrintResults writes the audit results to the specified writer. Defaults to printing results to stdout
-func (r *Report) PrintResults(ignores string, printOptions ...PrintOption) {
-	ignore_tests = strings.Split(ignores, ",")
+func (r *Report) PrintResults(ignores []string, printOptions ...PrintOption) {
+	ignore_tests = ignores
 	printer := NewPrinter(printOptions...)
 	printer.PrintReport(r)
 }

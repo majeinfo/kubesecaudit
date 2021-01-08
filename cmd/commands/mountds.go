@@ -11,7 +11,7 @@ var mountdsCmd = &cobra.Command{
 	Long: `This command determines which containers mount /var/run/docker.sock. 
 A WARN result is generated when a container mounts '/var/run/docker.sock'.
 Example usage:
-kubeaudit mountds`,
+kubesecaudit mountds`,
 	Run: runAudit(mountds.New()),
 }
 

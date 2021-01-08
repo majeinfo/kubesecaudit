@@ -18,8 +18,8 @@ A WARN result is generated for each of the following cases:
   - The memory limit is unset or exceeds the specified memory limit
 
 Example usage:
-kubeaudit limits
-kubeaudit limits --cpu 500m --memory 256Mi`,
+kubesecaudit limits
+kubesecaudit limits --cpu 500m --memory 256Mi`,
 	Run: func(cmd *cobra.Command, args []string) {
 		auditor, err := limits.New(limitsConfig)
 		if err != nil {

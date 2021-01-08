@@ -11,7 +11,7 @@ var seccompCmd = &cobra.Command{
 	Long: `This command determines which containers are running without Seccomp enabled.
 An ERROR result is generated when a container has Seccomp disabled or misconfigured.
 Example usage:
-kubeaudit seccomp`,
+kubesecaudit seccomp`,
 	Run: runAudit(seccomp.New()),
 }
 

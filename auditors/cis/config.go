@@ -1,6 +1,7 @@
 package cis
 
 type Config struct {
+	IgnoreList []string `yaml:"drop"`
 	KubadmConf string `yaml:"kubeadmConf"`
 	ApiserverPod string `yaml:"apiserverPod"`
 	ControllerManagerPod string `yaml:"controllerManagerPod"`

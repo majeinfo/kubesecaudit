@@ -11,7 +11,7 @@ var appArmorCmd = &cobra.Command{
 	Long: `This command determines which containers are running without AppArmor enabled.
 An ERROR result is generated when a container has AppArmor disabled or misconfigured.
 Example usage:
-kubeaudit apparmor`,
+kubesecaudit apparmor`,
 	Run: runAudit(apparmor.New()),
 }
 

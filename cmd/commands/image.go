@@ -16,11 +16,11 @@ An ERROR result is generated when a container does not match the image:tag
 
 An INFO result is generated when a container has a matching image:tag.
 
-This command is also a root command, check 'kubeaudit image --help'.
+This command is also a root command, check 'kubesecaudit image --help'.
 
 Example usage:
-kubeaudit image --image gcr.io/google_containers/echoserver:1.7
-kubeaudit image -i gcr.io/google_containers/echoserver:1.7`,
+kubesecaudit image --image gcr.io/google_containers/echoserver:1.7
+kubesecaudit image -i gcr.io/google_containers/echoserver:1.7`,
 	Run: func(cmd *cobra.Command, args []string) {
 		runAudit(image.New(imageConfig))(cmd, args)
 	},

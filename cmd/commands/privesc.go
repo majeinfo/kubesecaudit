@@ -13,7 +13,7 @@ var allowPrivilegeEscalationCmd = &cobra.Command{
 An ERROR result is generated when a container does not have 'allowPrivilegeEscalation = false' in its
   SecurityContext.
 Example usage:
-kubeaudit privesc`,
+kubesecaudit privesc`,
 	Run: runAudit(privesc.New()),
 }
 

@@ -12,7 +12,7 @@ var runAsNonRootCmd = &cobra.Command{
 An ERROR result is generated when container does not have 'runAsNonRoot = true' in either its container
   SecurityContext or its pod SecurityContext.
 Example usage:
-kubeaudit nonroot`,
+kubesecaudit nonroot`,
 	Run: runAudit(nonroot.New()),
 }
 

@@ -10,11 +10,10 @@ var cisConfig cis.Config
 
 var cisCmd = &cobra.Command{
 	Use:     "cis",
-	Aliases: []string{"cis"},
 	Short:   "Audit nodes with CIS Benchmark Rules",
 	Long: fmt.Sprintf(`
 Example usage:
-kubeaudit cis`),
+kubesecaudit cis`),
 	Run: func(cmd *cobra.Command, args []string) {
 		conf := loadKubeAuditConfigFromFile(auditAllConfig.configFile)
 
@@ -27,7 +26,7 @@ kubeaudit cis`),
 
 func init() {
 	RootCmd.AddCommand(cisCmd)
-	cisCmd.Flags().StringVarP(&auditAllConfig.configFile, "kconfig", "k", "", "Path to kubeaudit config")
-	cisCmd.Flags().StringVarP(&auditAllConfig.ignore_tests, "ignore", "", "", "Comma separated list on Tests to ignore")
+	cisCmd.Flags().StringVarP(&auditAllConfig.configFile, "kconfig", "k", "", "Path to kubesecaudit config")
+	cisCmd.Flags().StringSliceVarP(&auditAllConfig.ignore_tests, "ignore", "", []string{}, "Comma separated list on Tests to ignore")
 }
 

@@ -11,7 +11,7 @@ var readonlyfsCmd = &cobra.Command{
 	Long: `This command determines which containers do not have a read only root file system.
 An ERROR result is generated when a container does not have 'readOnlyRootFilesystem = true' in its SecurityContext.
 Example usage:
-kubeaudit rootfs`,
+kubesecaudit rootfs`,
 	Run: runAudit(rootfs.New()),
 }
 

@@ -13,7 +13,7 @@ var hostnsCmd = &cobra.Command{
 	
 An ERROR result is generated when a pod has at least one of hostNetwork, hostIPC or hostPID set to 'true'.
 Example usage:
-kubeaudit hostns`,
+kubesecaudit hostns`,
 	Run: runAudit(hostns.New()),
 }
 

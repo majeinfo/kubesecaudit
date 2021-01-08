@@ -14,7 +14,7 @@ An ERROR result is generated when a container has 'privileged = true' in its Sec
 A WARN result is generated a when a container has 'privileged = nil' in its SecurityContext. 'privileged'
   defaults to 'true' so this is ok, but it should be explicitly set to 'true'.
 Example usage:
-kubeaudit priv`,
+kubesecaudit priv`,
 	Run: runAudit(privileged.New()),
 }
 

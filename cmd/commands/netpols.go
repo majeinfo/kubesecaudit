@@ -17,7 +17,7 @@ A WARN result is generated for each of the following cases:
   - A namespace has a default allow-all-ingress NetworkPolicy
   - A namespace has a default allow-all-egress NetworkPolicy
 Example usage:
-kubeaudit netpols`,
+kubesecaudit netpols`,
 	Run: runAudit(netpols.New()),
 }
 

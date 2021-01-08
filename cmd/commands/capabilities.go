@@ -31,8 +31,8 @@ the drop list. If no drop list is provided, the following capabilities are dropp
 An ERROR result is generated when a pod has a capability which is on the drop list.
 
 Example usage:
-kubeaudit capabilities
-kubeaudit capabilities --drop "%s"`, formatDropList(), strings.Join(capabilities.DefaultDropList[:3], ",")),
+kubesecaudit capabilities
+kubesecaudit capabilities --drop "%s"`, formatDropList(), strings.Join(capabilities.DefaultDropList[:3], ",")),
 	Run: func(cmd *cobra.Command, args []string) {
 		runAudit(capabilities.New(capabilitiesConfig))(cmd, args)
 	},

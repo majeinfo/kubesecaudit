@@ -16,7 +16,7 @@ An ERROR result is generated when a container matches one of the following:
   automountServiceAccountToken = nil (defaults to true) and serviceAccountName is blank (default service account)
 A WARN result is generated when a pod is found using the deprecated 'serviceAccount' field.
 Example usage:
-kubeaudit asat`,
+kubesecaudit asat`,
 	Run: runAudit(asat.New()),
 }
 
