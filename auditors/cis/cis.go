@@ -145,11 +145,11 @@ func checkOwnerAndPerms(fname string, user string, group string, mode int) []*au
 		}
 		auditResults = append(auditResults, auditResult)
 	} else {
-		if (fileinfo.Mode().Perm() &^ 0640) != 0 {
+		if (fileinfo.Mode().Perm() &^ os.FileMode(mode)) != 0 {
 			auditResult := &audit.AuditResult{
 				Name:     FilePermsError,
 				Severity: audit.Error,
-				Message:  "File Permission should not be greater than 0640",
+				Message:  "File Permission should not be greater than " + fmt.Sprintf("%o", mode),
 				Metadata: audit.Metadata{
 					"File": fname,
 					"Perms": fmt.Sprintf("%o", fileinfo.Mode().Perm()),
