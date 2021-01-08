@@ -4,13 +4,13 @@ package cis
 
 import (
 	"fmt"
-	_ "fmt"
+	"os"
+	"os/user"
+	"strconv"
+	"syscall"
+
 	"github.com/majeinfo/kubesecaudit/audit"
 	"github.com/majeinfo/kubesecaudit/k8stypes"
-	"os"
-	_ "os"
-	//"github.com/majeinfo/kubeaudit/audit"
-	//"github.com/majeinfo/kubeaudit/k8stypes"
 )
 
 const Name = "cis"
@@ -19,6 +19,8 @@ const Name = "cis"
 const (
 	FileError = "FileError"
 	FilePermsError = "FilePermsError"
+	FileOwnerError = "FileOwnerError"
+	FileGroupOwnerError = "FileGroupOwnerError"
 
 	KubeApiServerNotFound = "KubeApiServerNotFound"
 	AnonymousAuthEnabled = "AnonymousAuthEnabled"
@@ -130,10 +132,11 @@ func auditFiles(cis *CISConfig) []*audit.AuditResult {
 	return auditResults
 }
 
-func checkOwnerAndPerms(fname string, user string, group string, mode int) []*audit.AuditResult {
+func checkOwnerAndPerms(fname string, user_spec string, group_spec string, mode int) []*audit.AuditResult {
 	var auditResults []*audit.AuditResult
 
-	if fileinfo, err := os.Stat(fname); err != nil {
+	fileinfo, err := os.Stat(fname)
+	if err != nil {
 		auditResult := &audit.AuditResult{
 			Name:     FileError,
 			Severity: audit.Warn,
@@ -144,19 +147,66 @@ func checkOwnerAndPerms(fname string, user string, group string, mode int) []*au
 			},
 		}
 		auditResults = append(auditResults, auditResult)
-	} else {
-		if (fileinfo.Mode().Perm() &^ os.FileMode(mode)) != 0 {
-			auditResult := &audit.AuditResult{
-				Name:     FilePermsError,
-				Severity: audit.Error,
-				Message:  "File Permission should not be greater than " + fmt.Sprintf("%o", mode),
-				Metadata: audit.Metadata{
-					"File": fname,
-					"Perms": fmt.Sprintf("%o", fileinfo.Mode().Perm()),
-				},
-			}
-			auditResults = append(auditResults, auditResult)
+
+		return auditResults
+	}
+
+	// Check permissions
+	if (fileinfo.Mode().Perm() &^ os.FileMode(mode)) != 0 {
+		auditResult := &audit.AuditResult{
+			Name:     FilePermsError,
+			Severity: audit.Error,
+			Message:  "File Permission should not be greater than " + fmt.Sprintf("%o", mode),
+			Metadata: audit.Metadata{
+				"File": fname,
+				"Perms": fmt.Sprintf("%o", fileinfo.Mode().Perm()),
+			},
 		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	// Check owner and group
+	stat := fileinfo.Sys().(*syscall.Stat_t)
+	uid := stat.Uid
+	u := strconv.FormatUint(uint64(uid), 10)
+	usr, err := user.LookupId(u)
+
+	if user_spec != u && (user_spec != usr.Username || err != nil) {
+		username := u
+		if err == nil {
+			username = usr.Username
+		}
+		auditResult := &audit.AuditResult{
+			Name:     FileOwnerError,
+			Severity: audit.Error,
+			Message:  "File Owner should be " + user_spec,
+			Metadata: audit.Metadata{
+				"File": fname,
+				"Owner": username,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
+	}
+
+	gid := stat.Gid
+	g := strconv.FormatUint(uint64(gid), 10)
+	group, err := user.LookupGroupId(g)
+
+	if group_spec != g && (group_spec != group.Name || err != nil) {
+		groupname := g
+		if err == nil {
+			groupname = group.Name
+		}
+		auditResult := &audit.AuditResult{
+			Name:     FileGroupOwnerError,
+			Severity: audit.Error,
+			Message:  "File Group Owner should be " + group_spec,
+			Metadata: audit.Metadata{
+				"File": fname,
+				"GroupOwner": groupname,
+			},
+		}
+		auditResults = append(auditResults, auditResult)
 	}
 
 	return auditResults
