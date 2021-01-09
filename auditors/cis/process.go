@@ -1,7 +1,6 @@
 package cis
 
 import (
-
 	"github.com/prometheus/procfs"
 	"strings"
 )
@@ -50,4 +49,14 @@ func FindProc(procs []Process, proc_name string) *Process {
 		}
 	}
 	return nil
+}
+
+func FindEnvVar(envvars []string, envvar string) (string, bool) {
+	for _, v := range envvars {
+		if strings.HasPrefix(v, envvar + "=") {
+			return strings.Split(v, "=")[1], true
+		}
+	}
+
+	return "", false
 }

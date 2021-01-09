@@ -70,6 +70,9 @@ const (
 	KubeletAlwaysAllowEnabled = "KubeletAlwaysAllowEnabled"
 	KubeletTLSCertFileNotSet = "KubeletTLSCertFileNotSet"
 	KubeletTLSPrivateKeyFileNotSet = "KubeletTLSPrivateKeyFileNotSet"
+	KubeletReadOnlyPortEnabled = "KubeletReadOnlyPortEnabled"
+	KubeletProtectKernelDefaultsDisabled = "KubeletProtectKernelDefaultsDisabled"
+	KubeletMakeIptablesutilChainsDisabled = "KubeletMakeIptablesutilChainsDisabled"
 
 	// Etcd
 	EtcdNotFound = "EtcdNotFound"
@@ -132,7 +135,7 @@ func init() {
 		conf_k8sPkiDir: { "/etc/kubernetes/pki", "root", "root", 0755 },
 		//{ "/etc/kubernetes/pki/*.crt", "root", "root", 0644 },
 		//{ "/etc/kubernetes/pki/*.key", "root", "root", 0600 },
-		conf_cniDir: { "/etc/cni/net.d", "root", "root", 0644 },
+		conf_cniDir: { "/etc/cni/net.d", "root", "root", 0755 },
 	}
 }
 

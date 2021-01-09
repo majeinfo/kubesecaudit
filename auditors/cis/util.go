@@ -1,6 +1,10 @@
 package cis
 
-import "strings"
+import (
+	"github.com/smallfish/simpleyaml"
+	"io/ioutil"
+	"strings"
+)
 
 func buildMapFromOptions(options []string) map[string]string {
 	opts := make(map[string]string, 50)
@@ -46,4 +50,17 @@ func getOptionValue(option string) string {
 		return ""
 	}
 	return parts[1]
+}
+
+func readYamlFile(fname string) (*simpleyaml.Yaml, error) {
+	source, err := ioutil.ReadFile(fname)
+	if err != nil {
+		return nil, err
+	}
+	yaml, err := simpleyaml.NewYaml(source)
+	if err != nil {
+		return nil, err
+	}
+
+	return yaml, nil
 }

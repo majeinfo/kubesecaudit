@@ -295,7 +295,7 @@ func (f *fixKubeletAnonymousAuthEnabled) Plan() string {
 type fixKubeletAlwaysAllowEnabled struct {}
 
 func (f *fixKubeletAlwaysAllowEnabled) Plan() string {
-	return fmt.Sprintf("Remove AlwaysAllow from the kubelet option --authorization-mode")
+	return fmt.Sprintf("Remove AlwaysAllow from the kubelet option --authorization-mode or from the configuration file")
 }
 
 type fixKubeletTLSCertFileNotSet struct {}
@@ -308,4 +308,22 @@ type fixKubeletTLSPrivateKeyFileNotSet struct {}
 
 func (f *fixKubeletTLSPrivateKeyFileNotSet) Plan() string {
 	return fmt.Sprintf("Add this option to kubelet --tls-private-key-file=/path/to/key")
+}
+
+type fixKubeletReadOnlyPortEnabled struct {}
+
+func (f *fixKubeletReadOnlyPortEnabled) Plan() string {
+	return fmt.Sprintf("Add this option to kubelet --read-only-port=0, or set the option 'readOnlyPort: 0' in the configuration file")
+}
+
+type fixKubeletProtectKernelDefaultsDisabled struct {}
+
+func (f *fixKubeletProtectKernelDefaultsDisabled) Plan() string {
+	return fmt.Sprintf("Remove this option from kubelet --protect-kernel-defaults=false, or from the configuration file")
+}
+
+type fixKubeletMakeIptablesutilChainsDisabled struct {}
+
+func (f *fixKubeletMakeIptablesutilChainsDisabled) Plan() string {
+	return fmt.Sprintf("Remove this option from kubelet --make-iptables-util-chains=false, or from the configuration file")
 }
