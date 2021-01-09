@@ -2,11 +2,14 @@ package cis
 
 import "github.com/majeinfo/kubesecaudit/audit"
 
-// TODO: options can also be defined using environment variables (ETCD_CA_FILE, ETCD_CERT_FILE...)
+// Analyze ETCD options
+// They can also be defined using environment variables (ETCD_CA_FILE, ETCD_CERT_FILE...),
+// but command line opts take precedence
 
 func auditEtcd(procs []Process) []*audit.AuditResult {
 	var auditResults []*audit.AuditResult
 	var proc *Process
+	var opt_val, env_val string
 
 	if proc = FindProc(procs, proc_etcd); proc == nil {
 		auditResult := &audit.AuditResult{
@@ -23,7 +26,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 
 	options := buildMapFromOptions(proc.options)
 
-	if _, found := options["cert-file"]; !found {
+	_, is_opt := options["cert-file"]
+	_, is_env := FindEnvVar(proc.envvar, "ETCD_CERT_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptCertFileNotSet,
 			Severity: audit.Error,
@@ -36,7 +41,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if _, found := options["key-file"]; !found {
+	_, is_opt = options["key-file"]
+	_, is_env = FindEnvVar(proc.envvar, "ETCD_KEY_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptKeyFileNotSet,
 			Severity: audit.Error,
@@ -49,7 +56,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if _, found := options["peer-cert-file"]; !found {
+	_, is_opt = options["peer-cert-file"]
+	_, is_env = FindEnvVar(proc.envvar, "ETCD_PEER_CERT_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptPeerCertFileNotSet,
 			Severity: audit.Error,
@@ -62,7 +71,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if _, found := options["key-file"]; !found {
+	_, is_opt = options["key-file"]
+	_, is_env = FindEnvVar(proc.envvar, "ETCD_KEY_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptPeerKeyFileNotSet,
 			Severity: audit.Error,
@@ -75,7 +86,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if value, found := options["auto-tls"]; found && value == "true" {
+	opt_val, is_opt = options["auto-tls"]
+	env_val, is_env = FindEnvVar(proc.envvar, "ETCD_AUTO_TLS")
+	if (is_opt && opt_val == "true") || (!is_opt && is_env && env_val == "true") {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptAutoTLSSet,
 			Severity: audit.Error,
@@ -88,7 +101,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if value, found := options["client-cert-auth"]; !found || value == "false" {
+	opt_val, is_opt = options["client-cert-auth"]
+	env_val, is_env = FindEnvVar(proc.envvar, "ETCD_CLIENT_CERT_AUTH")
+	if (!is_opt && !is_env) || (is_opt && opt_val == "false") || (!is_opt && is_env && env_val == "false") {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptClientCertAuthNotSSet,
 			Severity: audit.Error,
@@ -101,7 +116,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if value, found := options["peer-client-cert-auth"]; !found || value == "false" {
+	opt_val, is_opt = options["peer-client-cert-auth"]
+	env_val, is_env = FindEnvVar(proc.envvar, "ETCD_PEER_CLIENT_CERT_AUTH")
+	if (!is_opt && !is_env) || (is_opt && opt_val == "false") || (!is_opt && is_env && env_val == "false") {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptPeerClientCertAuthNotSSet,
 			Severity: audit.Error,
@@ -114,7 +131,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if value, found := options["peer-auto-tls"]; found && value == "true" {
+	opt_val, is_opt = options["peer-auto-tls"]
+	env_val, is_env = FindEnvVar(proc.envvar, "ETCD_PEER_AUTO_TLS")
+	if (is_opt && opt_val == "true") || (!is_opt && is_env && env_val == "true") {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptPeerAutoTLSSet,
 			Severity: audit.Error,
@@ -127,7 +146,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if _, found := options["peer-trusted-ca-file"]; !found {
+	_, is_opt = options["peer-trusted-ca-file"]
+	_, is_env = FindEnvVar(proc.envvar, "ETCD_PEER_TRUSTED_CA_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptPeerTrustedCAFileNotSet,
 			Severity: audit.Error,
@@ -140,7 +161,9 @@ func auditEtcd(procs []Process) []*audit.AuditResult {
 		auditResults = append(auditResults, auditResult)
 	}
 
-	if _, found := options["trusted-ca-file"]; !found {
+	_, is_opt = options["trusted-ca-file"]
+	_, is_env = FindEnvVar(proc.envvar, "ETCD_TRUSTED_CA_FILE")
+	if !is_opt && !is_env {
 		auditResult := &audit.AuditResult{
 			Name:     EtcdOptTrustedCAFileNotSet,
 			Severity: audit.Error,
