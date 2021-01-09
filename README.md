@@ -20,12 +20,12 @@ Other improvements of the original fork :
 - analyzes the Cluster configuration
 - adds a command line option to ignore specific tests
 
-#Installation
-##Download a binary
+# Installation
+## Download a binary
 
 **Kubesecaudit** has official releases [here](https://github.com/majeinfo/kubesecaudit/releases)
 
-##..or build it !
+## ..or build it !
 
 Requirements: go v1.14+, git v2+
 ```
@@ -34,7 +34,7 @@ $ cd kubesecaudit
 $ go build -o kubesecaudit cmd/main.go
 ```
 
-#Quick Start
+# Quick Start
 **kubesecaudit** tries to connect to a cluster using the local **kubeconfig** file (**$HOME/.kube/config**). 
 A different **kubeconfig** location can be specified using the **-c/--kubeconfig** flag.
 
@@ -100,7 +100,7 @@ Global Flags:
 -n, --namespace string     Only audit resources in the specified namespace. Not currently supported in manifest mode.
 -o, --output string        The output format to use (one of "pretty", "logrus", "json") (default "pretty")
 ```
-#Configuration File
+# Configuration File
 
 **kubesecaudit** accepts a configuration file with the **-k** or **-kconfig** option.
 This YAML file can be used for two things:
@@ -144,7 +144,7 @@ auditors:
     kubeEtcdPod: "/etc/kubernetes/manifests/etcd.yaml"
 ```
 
-#Override errors
+# Override errors
 
 Security issues can be ignored for specific containers or pods by adding override labels. This means the auditor will produce info results instead of error results and the audit result name will have Allowed appended to it. The labels are documented in each auditor's documentation, but the general format for auditors that support overrides is as follows:
 
